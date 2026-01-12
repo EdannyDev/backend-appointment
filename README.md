@@ -69,4 +69,4 @@ http://localhost:5000
 - Días bloqueados: `/api/v1/blocked-days`
 
 ## 🔗Enlaces útiles
-Frontend: https://github.com/EdannyDev/frontend-appointments
+Frontend: https://github.com/EdannyDev/frontend-appointment
