@@ -16,11 +16,11 @@ The architecture ensures separation of concerns and consistent rule enforcement 
 
 ## 🔐 Authentication & Security
 
-- Password hashing using bcryptjs  
+- Password hashing using `bcryptjs`  
 - JWT-based authentication  
 - Secure session handling via HttpOnly cookies  
 - Role-based authorization middleware  
-- Environment-based configuration  
+- Environment-based configuration using `dotenv`
 
 ## 👥 Role-Based Access Control (RBAC)
 
