@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export const authMiddleware = (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies?.token;
 
   if (!token) {
     return res.status(401).json({
@@ -14,10 +14,10 @@ export const authMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({
       success: false,
-      message: 'Token inválido',
+      message: 'Token inválido o expirado',
     });
   }
 };
