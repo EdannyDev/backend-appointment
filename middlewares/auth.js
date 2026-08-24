@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 
+// Verifica que el token JWT sea válido y adjunta el usuario al request
 export const authMiddleware = (req, res, next) => {
   const token = req.cookies?.token;
 

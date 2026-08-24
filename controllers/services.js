@@ -1,19 +1,6 @@
 import * as servicesService from '../services/services.js';
 
-// Crear servicio
-export const createService = async (req, res) => {
-  try {
-    const result = await servicesService.createService(req.body);
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-    });
-  }
-};
-
-// Obtener activos
+// Obtener servicios activos (PUBLIC)
 export const getActiveServices = async (req, res) => {
   try {
     const result = await servicesService.getActiveServices();
@@ -26,10 +13,10 @@ export const getActiveServices = async (req, res) => {
   }
 };
 
-// Obtener todos (admin)
+// Obtener todos los servicios (ADMIN)
 export const getAllServices = async (req, res) => {
   try {
-    const result = await servicesService.getAllServices();
+    const result = await servicesService.getAllServices(req.query);
     res.json(result);
   } catch (error) {
     res.status(500).json({
@@ -39,7 +26,20 @@ export const getAllServices = async (req, res) => {
   }
 };
 
-// Actualizar servicio
+// Crear servicio (ADMIN)
+export const createService = async (req, res) => {
+  try {
+    const result = await servicesService.createService(req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Error interno del servidor',
+    });
+  }
+};
+
+// Actualizar servicio (ADMIN)
 export const updateService = async (req, res) => {
   try {
     const result = await servicesService.updateService(
@@ -55,7 +55,7 @@ export const updateService = async (req, res) => {
   }
 };
 
-// Desactivar servicio
+// Desactivar servicio (ADMIN)
 export const deactivateService = async (req, res) => {
   try {
     const result = await servicesService.deactivateService(req.params.id);

@@ -1,23 +1,23 @@
 import express from 'express';
-import { authMiddleware } from '../middlewares/auth.js';
 import { isAdmin } from '../middlewares/admin.js';
-import * as Controller from '../controllers/blockedDays.js';
+import { authMiddleware } from '../middlewares/auth.js';
+import * as controller from '../controllers/blockedDays.js';
 
 const router = express.Router();
 
-// Bloquear día (ADMIN)
-router.post('/', authMiddleware, isAdmin, Controller.blockDay);
+// Obtener días bloqueados (ADMIN)
+router.get('/', authMiddleware, isAdmin, controller.getBlockedDays);
+
+// Bloquear día individual (ADMIN)
+router.post('/', authMiddleware, isAdmin, controller.blockDay);
 
 // Bloquear rango de días (ADMIN)
-router.post('/range', authMiddleware, isAdmin, Controller.blockRange);
-
-// Obtener días bloqueados (ADMIN) - permite filtro por rango
-router.get('/', authMiddleware, isAdmin, Controller.getBlockedDays);
+router.post('/range', authMiddleware, isAdmin, controller.blockRange);
 
 // Eliminar rango de días bloqueados (ADMIN)
-router.delete('/range', authMiddleware, isAdmin, Controller.deleteBlockedRange);
+router.delete('/range', authMiddleware, isAdmin, controller.deleteBlockedRange);
 
-// Eliminar día bloqueado (ADMIN)
-router.delete('/:id', authMiddleware, isAdmin, Controller.deleteBlockedDay);
+// Eliminar día bloqueado por ID (ADMIN)
+router.delete('/:id', authMiddleware, isAdmin, controller.deleteBlockedDay);
 
 export default router;

@@ -1,23 +1,23 @@
 import express from 'express';
-import { authMiddleware } from '../middlewares/auth.js';
 import { isAdmin } from '../middlewares/admin.js';
-import * as Controller from '../controllers/services.js';
+import { authMiddleware } from '../middlewares/auth.js';
+import * as controller from '../controllers/services.js';
 
 const router = express.Router();
 
-// Crear servicio (ADMIN)
-router.post('/', authMiddleware, isAdmin, Controller.createService);
-
 // Obtener servicios activos (PUBLIC)
-router.get('/', Controller.getActiveServices);
+router.get('/', controller.getActiveServices);
 
 // Obtener todos los servicios (ADMIN)
-router.get('/admin', authMiddleware, isAdmin, Controller.getAllServices);
+router.get('/admin', authMiddleware, isAdmin, controller.getAllServices);
+
+// Crear servicio (ADMIN)
+router.post('/', authMiddleware, isAdmin, controller.createService);
 
 // Actualizar servicio (ADMIN)
-router.put('/:id', authMiddleware, isAdmin, Controller.updateService);
+router.put('/:id', authMiddleware, isAdmin, controller.updateService);
 
 // Desactivar servicio (ADMIN)
-router.delete('/:id', authMiddleware, isAdmin, Controller.deactivateService);
+router.delete('/:id', authMiddleware, isAdmin, controller.deactivateService);
 
 export default router;

@@ -1,17 +1,17 @@
 import express from 'express';
-import { authMiddleware } from '../middlewares/auth.js';
 import { isAdmin } from '../middlewares/admin.js';
-import * as Controller from '../controllers/businessHours.js';
+import { authMiddleware } from '../middlewares/auth.js';
+import * as controller from '../controllers/businessHours.js';
 
 const router = express.Router();
 
-// Guardar o actualizar horario laboral (ADMIN)
-router.post('/', authMiddleware, isAdmin, Controller.saveBusinessHour);
-
 // Obtener horarios laborales activos (PUBLIC)
-router.get('/', Controller.getActiveBusinessHours);
+router.get('/', controller.getActiveBusinessHours);
 
 // Obtener todos los horarios laborales (ADMIN)
-router.get('/admin', authMiddleware, isAdmin, Controller.getAllBusinessHours);
+router.get('/admin', authMiddleware, isAdmin, controller.getAllBusinessHours);
+
+// Guardar o actualizar horario laboral (ADMIN)
+router.post('/', authMiddleware, isAdmin, controller.saveBusinessHour);
 
 export default router;

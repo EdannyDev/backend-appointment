@@ -8,28 +8,31 @@ const router = express.Router();
 // Obtener horarios disponibles (PUBLIC)
 router.get('/available-slots', controller.getAvailableSlots);
 
-// Obtener mis citas (CLIENT)
+// Obtener citas del usuario autenticado (CLIENT)
 router.get('/my', authMiddleware, controller.getMyAppointments);
 
-// Crear una nueva cita (CLIENT)
+// Crear cita (CLIENT)
 router.post('/', authMiddleware, controller.create);
-
-// Obtener citas por día (ADMIN)
-router.get('/day', authMiddleware, isAdmin, controller.getByDay);
 
 // Obtener todas las citas (ADMIN)
 router.get('/', authMiddleware, isAdmin, controller.getAll);
 
+// Obtener citas del día indicado (ADMIN)
+router.get('/day', authMiddleware, isAdmin, controller.getByDay);
+
+// Obtener resumen de citas (ADMIN)
+router.get('/summary', authMiddleware, isAdmin, controller.getSummary);
+
 // Obtener cita por ID (CLIENT)
 router.get('/:id', authMiddleware, controller.getById);
 
-// Cancelar una cita (CLIENT)
+// Cancelar cita (CLIENT)
 router.put('/:id/cancel', authMiddleware, controller.cancel);
 
-// Reprogramar una cita (CLIENT)
+// Reprogramar cita (CLIENT)
 router.put('/:id/reschedule', authMiddleware, controller.reschedule);
 
-// Actualizar el estado de una cita (ADMIN)
+// Actualizar estado de una cita (ADMIN)
 router.put('/:id/status', authMiddleware, isAdmin, controller.updateStatus);
 
 export default router;
