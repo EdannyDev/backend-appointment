@@ -102,7 +102,7 @@ cp .env.example .env
 | `DB_NAME`           | MySQL database name                                        | `appointmentsDB`                |
 | `JWT_SECRET`        | Secret key used to sign JWT tokens                         | `your_jwt_secret_key`           |
 | `JWT_EXPIRES_IN`    | JWT expiration window                                      | `1d`                             |
-| `CLIENT_URL`        | Frontend origin (used for CORS & cookie settings)          | `http://localhost:3000`         |
+| `CLIENT_URL`        | Frontend origin (used for CORS & cookie settings)          | `https://gestor-citas-edannydev.vercel.app` |
 | `RESEND_API_KEY`    | API key for the Resend email service                       | `your_resend_api_key`           |
 | `RESEND_FROM`       | Verified sender address used for outgoing emails           | `onboarding@resend.dev`         |
 | `ADMIN_EMAIL`       | Address that receives admin-facing notifications           | `admin@example.com`             |
@@ -114,6 +114,16 @@ node server.js
 ```
 
 The API will be available at `http://localhost:5000`.
+
+## 🌐 Deployment
+
+The API is deployed on [Render](https://render.com) (free tier), with [Aiven](https://aiven.io) MySQL (free tier) as the managed database.
+
+- **API**: [backend-appointment-0eqz.onrender.com](https://backend-appointment-0eqz.onrender.com)
+
+### Cold Starts & Health Checks
+
+Render's free tier spins the service down after periods of inactivity, so the first request after idle time is delayed (cold start). A `/health` endpoint checks both server and DB connectivity, and is pinged periodically by [UptimeRobot](https://uptimerobot.com) and [cron-job.org](https://cron-job.org) to keep the instance warm and reduce cold-start impact.
 
 ## 📜 Available Scripts
 
