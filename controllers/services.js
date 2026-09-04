@@ -1,46 +1,37 @@
 import * as servicesService from '../services/services.js';
 
 // Obtener servicios activos (PUBLIC)
-export const getActiveServices = async (req, res) => {
+export const getActiveServices = async (req, res, next) => {
   try {
     const result = await servicesService.getActiveServices();
     res.json(result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Obtener todos los servicios (ADMIN)
-export const getAllServices = async (req, res) => {
+export const getAllServices = async (req, res, next) => {
   try {
     const result = await servicesService.getAllServices(req.query);
     res.json(result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Crear servicio (ADMIN)
-export const createService = async (req, res) => {
+export const createService = async (req, res, next) => {
   try {
     const result = await servicesService.createService(req.body);
     res.status(201).json(result);
   } catch (error) {
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Actualizar servicio (ADMIN)
-export const updateService = async (req, res) => {
+export const updateService = async (req, res, next) => {
   try {
     const result = await servicesService.updateService(
       req.params.id,
@@ -48,22 +39,16 @@ export const updateService = async (req, res) => {
     );
     res.json(result);
   } catch (error) {
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Desactivar servicio (ADMIN)
-export const deactivateService = async (req, res) => {
+export const deactivateService = async (req, res, next) => {
   try {
     const result = await servicesService.deactivateService(req.params.id);
     res.json(result);
   } catch (error) {
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-    });
+    next(error);
   }
 };

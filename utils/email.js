@@ -36,6 +36,7 @@ const header = (subtitle = '') => `
       <tr><td style="padding:24px 28px;">
 `;
 
+// Helpers para construir el Footer de los correos
 const footer = () => `
       </td></tr>
       <tr>
@@ -103,7 +104,7 @@ export const sendAppointmentCreatedClient = async (to, { clientName, serviceName
     to,
     subject: `Tu cita ha sido agendada — ${APP_NAME}`,
     html: `${header()}
-      ${pill('✅', 'Cita agendada', '#dcfce7', '#166534')}
+      ${pill('🗓️', 'Cita agendada', '#dcfce7', '#166534')}
       ${bodyHeader('¡Tu cita está registrada!', `Hola ${clientName}, tu cita ha sido registrada correctamente. Aquí tienes los detalles:`)}
       ${appointmentRows({ serviceName, date, startTime, endTime })}
       ${note('Puedes cancelar o reprogramar tu cita con al menos <strong>12 horas de anticipación</strong> desde tu cuenta.')}

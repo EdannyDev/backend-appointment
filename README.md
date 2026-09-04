@@ -13,7 +13,8 @@ It enforces business-hour constraints, relational data integrity and secure role
 The application follows a layered structure:
 
 - **Routes** → Define API endpoints
-- **Controllers** → Handle business logic
+- **Controllers** → Handle request/response and delegate to services
+- **Services** → Business logic, validation and database access
 - **Middlewares** → Authentication & role validation
 
 The architecture ensures separation of concerns and consistent rule enforcement before data persistence.
@@ -40,6 +41,7 @@ The architecture ensures separation of concerns and consistent rule enforcement 
 **Client**
 - Register & authenticate
 - Book appointments
+- Reschedule appointments
 - Cancel appointments
 - View booking history
 
@@ -97,6 +99,7 @@ cp .env.example .env
 |----------------------|-----------------------------------------------------------|----------------------------------|
 | `PORT`              | Port the server listens on                                | `5000`                          |
 | `DB_HOST`           | MySQL host                                                 | `localhost`                     |
+| `DB_PORT`           | MySQL port (required in production)                       | `3306`                          |
 | `DB_USER`           | MySQL user                                                 | `root`                          |
 | `DB_PASSWORD`       | MySQL password                                             | *(empty for local dev)*         |
 | `DB_NAME`           | MySQL database name                                        | `appointmentsDB`                |

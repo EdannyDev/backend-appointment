@@ -37,16 +37,16 @@ export const getAllServices = async (query = {}) => {
 // Crear servicio (ADMIN)
 export const createService = async ({ name, description, duration, price }) => {
   if (!name || typeof name !== 'string')
-    throw { status: 400, message: 'El nombre es obligatorio.' };
+    throw { status: 400, message: 'El nombre es obligatorio' };
 
   if (!Number.isInteger(duration) || duration <= 0)
-    throw { status: 400, message: 'La duración debe ser un número entero mayor a 0.' };
+    throw { status: 400, message: 'La duración debe ser un número entero mayor a 0' };
 
   if (!isMultipleOf(duration, 15))
-    throw { status: 400, message: 'La duración debe ser múltiplo de 15 minutos.' };
+    throw { status: 400, message: 'La duración debe ser múltiplo de 15 minutos' };
 
   if (typeof price !== 'number' || price <= 0)
-    throw { status: 400, message: 'El precio debe ser mayor a 0.' };
+    throw { status: 400, message: 'El precio debe ser mayor a 0' };
 
   await db.query(
     `INSERT INTO services (name, description, duration, price)
@@ -54,7 +54,7 @@ export const createService = async ({ name, description, duration, price }) => {
     [name.trim(), description || null, duration, price]
   );
 
-  return { success: true, message: 'Servicio creado correctamente.' };
+  return { success: true, message: 'Servicio creado correctamente' };
 };
 
 // Actualizar servicio (ADMIN)
@@ -65,7 +65,7 @@ export const updateService = async (id, data) => {
   );
 
   if (!rows.length)
-    throw { status: 404, message: 'Servicio no encontrado.' };
+    throw { status: 404, message: 'Servicio no encontrado' };
 
   const existing = rows[0];
 
@@ -76,16 +76,16 @@ export const updateService = async (id, data) => {
   const is_active = data.is_active ?? existing.is_active;
 
   if (!existing.is_active && is_active !== true)
-    throw { status: 400, message: 'No se puede modificar un servicio inactivo.' };
+    throw { status: 400, message: 'No se puede modificar un servicio inactivo' };
 
   if (!Number.isInteger(duration) || duration <= 0)
-    throw { status: 400, message: 'La duración debe ser un número entero mayor a 0.' };
+    throw { status: 400, message: 'La duración debe ser un número entero mayor a 0' };
 
   if (!isMultipleOf(duration, 15))
-    throw { status: 400, message: 'La duración debe ser múltiplo de 15 minutos.' };
+    throw { status: 400, message: 'La duración debe ser múltiplo de 15 minutos' };
 
   if (typeof price !== 'number' || price <= 0)
-    throw { status: 400, message: 'El precio debe ser mayor a 0.' };
+    throw { status: 400, message: 'El precio debe ser mayor a 0' };
 
   await db.query(
     `UPDATE services
@@ -94,7 +94,7 @@ export const updateService = async (id, data) => {
     [name.trim(), description || null, duration, price, is_active, id]
   );
 
-  return { success: true, message: 'Servicio actualizado correctamente.' };
+  return { success: true, message: 'Servicio actualizado correctamente' };
 };
 
 // Desactivar servicio (ADMIN)
@@ -105,7 +105,7 @@ export const deactivateService = async (id) => {
   );
 
   if (result.affectedRows === 0)
-    throw { status: 404, message: 'Servicio no encontrado.' };
+    throw { status: 404, message: 'Servicio no encontrado' };
 
   return {
     success: true,

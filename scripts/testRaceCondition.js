@@ -1,20 +1,14 @@
 // Script de prueba manual para verificar el fix de condición de carrera.
-// Uso: node scripts/testRaceCondition.js
-// Requiere que el servidor esté corriendo y que exista un usuario CLIENT
-// con las credenciales indicadas abajo.
-
 const BASE_URL = 'http://localhost:5000/api/v2';
-
 const CLIENT_EMAIL = 'tu_cliente_de_prueba@correo.com';
 const CLIENT_PASSWORD = 'TuPassword123!';
 
-// Ajusta estos IDs a servicios reales de tu base de datos que se traslapen en duración
-const SERVICE_A_ID = 1; // ej. 45 min
-const SERVICE_B_ID = 2; // ej. 30 min
+const SERVICE_A_ID = 1;
+const SERVICE_B_ID = 2;
 
-const TEST_DATE = '2026-07-20'; // una fecha futura, dentro de horario laboral
+const TEST_DATE = '2026-07-20';
 const START_TIME_A = '10:00';
-const START_TIME_B = '10:15'; // se traslapa con el fin de A si A dura 45 min
+const START_TIME_B = '10:15';
 
 const extractCookie = (res) => {
   const raw = res.headers.get('set-cookie');
@@ -64,11 +58,11 @@ const run = async () => {
 
   console.log('\n=== VEREDICTO ===');
   if (successCount === 1) {
-    console.log('✅ CORRECTO: solo una de las dos reservas se creó. El lock funcionó.');
+    console.log('CORRECTO: solo una de las dos reservas se creó. El lock funcionó.');
   } else if (successCount === 2) {
-    console.log('❌ BUG: ambas reservas se crearon. Hay doble-booking traslapado.');
+    console.log('BUG: ambas reservas se crearon. Hay doble-booking traslapado.');
   } else {
-    console.log('⚠️ Ninguna se creó — revisa los datos de prueba (servicios, horario laboral, fecha).');
+    console.log('Ninguna se creó — revisa los datos de prueba (servicios, horario laboral, fecha).');
   }
 };
 

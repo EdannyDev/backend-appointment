@@ -73,7 +73,7 @@ export const saveBusinessHour = async (day, start, end) => {
   );
 
   if (conflicts.length > 0)
-    throw { status: 400, message: 'Hay citas futuras fuera del nuevo rango horario' };
+    throw { status: 409, message: 'Hay citas futuras fuera del nuevo rango horario' };
 
   if (rows.length === 0) {
     await db.query(

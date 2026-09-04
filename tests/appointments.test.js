@@ -11,9 +11,7 @@ const addDays = (days) => {
   return d.toISOString().slice(0, 10);
 };
 
-// Mock de conexión: entrega las respuestas en el mismo orden en que
-// el código real las consulta. Si se llama más veces de las esperadas,
-// falla explícitamente para detectar queries de más.
+// Mock de conexión: Entrega respuestas predefinidas a las queries, y registra las queries que se hicieron
 const createMockConn = (responses) => {
   const queue = [...responses];
   const calls = [];
@@ -29,10 +27,9 @@ const createMockConn = (responses) => {
 };
 
 describe('getAvailableSlots', () => {
-  // Si el día está bloqueado, no debe calcular nada más
   test('devuelve lista vacía cuando el día está bloqueado', async () => {
     const conn = createMockConn([
-      [[{ id: 1 }]], // blocked_days: sí hay bloqueo
+      [[{ id: 1 }]],
     ]);
 
     const result = await getAvailableSlots(1, addDays(5), conn);
@@ -42,7 +39,7 @@ describe('getAvailableSlots', () => {
 
   // Más allá del rango permitido no debe ni siquiera consultar la BD
   test('devuelve lista vacía sin consultar la BD si la fecha excede el máximo permitido', async () => {
-    const conn = createMockConn([]); // cualquier query lanza error
+    const conn = createMockConn([]);
 
     const result = await getAvailableSlots(1, addDays(100), conn);
 
@@ -52,8 +49,8 @@ describe('getAvailableSlots', () => {
   // Servicio inexistente o inactivo
   test('lanza 404 si el servicio no existe o está inactivo', async () => {
     const conn = createMockConn([
-      [[]], // blocked_days: no bloqueado
-      [[]], // services: no encontrado
+      [[]],
+      [[]],
     ]);
 
     await assert.rejects(
@@ -68,9 +65,9 @@ describe('getAvailableSlots', () => {
   // El negocio no atiende ese día de la semana
   test('devuelve lista vacía si el negocio no atiende ese día', async () => {
     const conn = createMockConn([
-      [[]], // blocked_days
-      [[{ duration: 30 }]], // services
-      [[]], // business_hours: sin horario activo
+      [[]],
+      [[{ duration: 30 }]],
+      [[]],
     ]);
 
     const result = await getAvailableSlots(1, addDays(5), conn);
@@ -78,14 +75,13 @@ describe('getAvailableSlots', () => {
     assert.deepEqual(result.data, []);
   });
 
-  // Cálculo base: sin citas existentes, los slots deben calcularse
-  // cada 15 minutos, dejando espacio suficiente para la duración
+  // Cálculo base: sin citas existentes, los slots deben calcularse cada 15 minutos
   test('calcula correctamente los slots de un día completo sin citas existentes', async () => {
     const conn = createMockConn([
-      [[]], // blocked_days
-      [[{ duration: 60 }]], // services: 1 hora
-      [[{ start_time: '09:00:00', end_time: '11:00:00' }]], // business_hours
-      [[]], // appointments: ninguna
+      [[]],
+      [[{ duration: 60 }]],
+      [[{ start_time: '09:00:00', end_time: '11:00:00' }]],
+      [[]],
     ]);
 
     const result = await getAvailableSlots(1, addDays(5), conn);
@@ -93,14 +89,13 @@ describe('getAvailableSlots', () => {
     assert.deepEqual(result.data, ['09:00', '09:15', '09:30', '09:45', '10:00']);
   });
 
-  // Con una cita existente, los slots que se traslapan deben excluirse,
-  // pero solo esos — no todo el día
+  // Con una cita existente, los slots que se traslapan deben excluirse
   test('excluye únicamente los slots que se traslapan con una cita existente', async () => {
     const conn = createMockConn([
-      [[]], // blocked_days
-      [[{ duration: 30 }]], // services
-      [[{ start_time: '09:00:00', end_time: '11:00:00' }]], // business_hours
-      [[{ start_time: '09:30:00', end_time: '10:00:00' }]], // appointments: una cita
+      [[]],
+      [[{ duration: 30 }]],
+      [[{ start_time: '09:00:00', end_time: '11:00:00' }]],
+      [[{ start_time: '09:30:00', end_time: '10:00:00' }]],
     ]);
 
     const result = await getAvailableSlots(1, addDays(5), conn);
@@ -108,19 +103,16 @@ describe('getAvailableSlots', () => {
     assert.deepEqual(result.data, ['09:00', '10:00', '10:15', '10:30']);
   });
 
-  // El buffer de anticipación solo aplica cuando la fecha consultada es hoy.
-  // Nota: esta prueba usa la hora real del sistema al momento de correrla,
-  // por lo que hay una ventana teórica (milisegundos) de posible desfase
-  // justo en el límite del minuto — riesgo aceptado y despreciable.
+  // El buffer de anticipación solo aplica cuando la fecha consultada es hoy
   test('respeta el buffer de anticipación al consultar horarios para hoy', async () => {
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
 
     const conn = createMockConn([
-      [[]], // blocked_days
-      [[{ duration: 15 }]], // services
-      [[{ start_time: '00:00:00', end_time: '23:45:00' }]], // business_hours: todo el día
-      [[]], // appointments
+      [[]],
+      [[{ duration: 15 }]],
+      [[{ start_time: '00:00:00', end_time: '23:45:00' }]],
+      [[]],
     ]);
 
     const result = await getAvailableSlots(1, todayStr, conn);
@@ -136,10 +128,9 @@ describe('getAvailableSlots', () => {
 });
 
 describe('validateAndGetEndTime', () => {
-  // Servicio inexistente o inactivo
   test('lanza 404 si el servicio no existe o está inactivo', async () => {
     const conn = createMockConn([
-      [[]], // services: no encontrado
+      [[]],
     ]);
 
     await assert.rejects(
@@ -151,11 +142,11 @@ describe('validateAndGetEndTime', () => {
     );
   });
 
-  // Día bloqueado
+  // La cita no puede caer en un día bloqueado
   test('lanza error si la fecha está bloqueada', async () => {
     const conn = createMockConn([
-      [[{ duration: 30 }]], // services
-      [[{ id: 1 }]], // blocked_days: sí bloqueado
+      [[{ duration: 30 }]],
+      [[{ id: 1 }]],
     ]);
 
     await assert.rejects(
@@ -168,13 +159,13 @@ describe('validateAndGetEndTime', () => {
     );
   });
 
-  // Fuera del horario laboral
+  // La cita debe caer dentro del horario laboral del negocio
   test('lanza error si el horario cae fuera del horario laboral', async () => {
     const conn = createMockConn([
-      [[{ duration: 30 }]], // services
-      [[]], // blocked_days
-      [[{ end_time: '09:30:00' }]], // ADDTIME calc
-      [[{ start_time: '10:00:00', end_time: '18:00:00' }]], // business_hours: abre a las 10
+      [[{ duration: 30 }]],
+      [[]],
+      [[{ end_time: '09:30:00' }]],
+      [[{ start_time: '10:00:00', end_time: '18:00:00' }]],
     ]);
 
     await assert.rejects(
@@ -187,18 +178,18 @@ describe('validateAndGetEndTime', () => {
     );
   });
 
-  // Buffer de anticipación — reserva demasiado próxima para hoy
+  // Buffer de anticipación: Si la cita es para hoy, debe respetarse el buffer de anticipación
   test('lanza error si la reserva no respeta el buffer de anticipación', async () => {
     const now = new Date();
-    const soon = new Date(now.getTime() + 10 * 60000); // en 10 minutos, buffer real es 30
+    const soon = new Date(now.getTime() + 10 * 60000);
     const start_time = `${String(soon.getHours()).padStart(2, '0')}:${String(soon.getMinutes()).padStart(2, '0')}`;
     const todayStr = now.toISOString().slice(0, 10);
 
     const conn = createMockConn([
-      [[{ duration: 15 }]], // services
-      [[]], // blocked_days
-      [[{ end_time: '23:59:00' }]], // ADDTIME calc
-      [[{ start_time: '00:00:00', end_time: '23:59:00' }]], // business_hours: todo el día
+      [[{ duration: 15 }]],
+      [[]],
+      [[{ end_time: '23:59:00' }]],
+      [[{ start_time: '00:00:00', end_time: '23:59:00' }]],
     ]);
 
     await assert.rejects(
@@ -214,31 +205,31 @@ describe('validateAndGetEndTime', () => {
   // Traslape con otra cita
   test('lanza error si el horario ya está ocupado por otra cita', async () => {
     const conn = createMockConn([
-      [[{ duration: 30 }]], // services
-      [[]], // blocked_days
-      [[{ end_time: '09:30:00' }]], // ADDTIME calc
-      [[{ start_time: '08:00:00', end_time: '18:00:00' }]], // business_hours
-      [[{ id: 42 }]], // overlaps: sí hay traslape
+      [[{ duration: 30 }]],
+      [[]],
+      [[{ end_time: '09:30:00' }]],
+      [[{ start_time: '08:00:00', end_time: '18:00:00' }]],
+      [[{ id: 42 }]],
     ]);
 
     await assert.rejects(
       () => validateAndGetEndTime({ service_id: 1, date: addDays(5), start_time: '09:00' }, conn),
       (err) => {
-        assert.equal(err.status, 400);
+        assert.equal(err.status, 409);
         assert.match(err.message, /ocupado/i);
         return true;
       }
     );
   });
 
-  // Camino exitoso: todo válido, debe devolver la hora de fin calculada
+  // Cuando todo es válido, debe devolver la hora de fin calculada correctamente
   test('resuelve con la hora de fin correcta cuando todo es válido', async () => {
     const conn = createMockConn([
-      [[{ duration: 30 }]], // services
-      [[]], // blocked_days
-      [[{ end_time: '09:30:00' }]], // ADDTIME calc
-      [[{ start_time: '08:00:00', end_time: '18:00:00' }]], // business_hours
-      [[]], // overlaps: ninguno
+      [[{ duration: 30 }]],
+      [[]],
+      [[{ end_time: '09:30:00' }]],
+      [[{ start_time: '08:00:00', end_time: '18:00:00' }]],
+      [[]],
     ]);
 
     const endTime = await validateAndGetEndTime(
@@ -252,11 +243,11 @@ describe('validateAndGetEndTime', () => {
   // Al reprogramar, la cita propia debe excluirse de la validación de traslape
   test('excluye la propia cita de la validación de traslape al reprogramar', async () => {
     const conn = createMockConn([
-      [[{ duration: 30 }]], // services
-      [[]], // blocked_days
-      [[{ end_time: '09:30:00' }]], // ADDTIME calc
-      [[{ start_time: '08:00:00', end_time: '18:00:00' }]], // business_hours
-      [[]], // overlaps: ninguno (excluyendo la propia)
+      [[{ duration: 30 }]],
+      [[]],
+      [[{ end_time: '09:30:00' }]],
+      [[{ start_time: '08:00:00', end_time: '18:00:00' }]],
+      [[]],
     ]);
 
     await validateAndGetEndTime(

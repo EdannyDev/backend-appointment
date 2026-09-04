@@ -27,7 +27,7 @@ export const getBlockedDays = async (start_date, end_date) => {
 // Bloquear día individual (ADMIN)
 export const blockDay = async (date, reason) => {
   if (!date)
-    throw { status: 400, message: 'La fecha es obligatoria.' };
+    throw { status: 400, message: 'La fecha es obligatoria' };
 
   const [conflicts] = await db.query(
     `SELECT id FROM appointments
@@ -38,9 +38,9 @@ export const blockDay = async (date, reason) => {
 
   if (conflicts.length > 0)
     throw {
-      status: 400,
-      message: `No se puede bloquear el día ${date}, ya existen citas registradas.`,
-    };
+      status: 409,
+      message: `No se puede bloquear el día ${date}, ya existen citas registradas`,
+  };
 
   try {
     await db.query(
@@ -49,22 +49,22 @@ export const blockDay = async (date, reason) => {
     );
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY')
-      throw { status: 400, message: `El día ${date} ya se encuentra bloqueado.` };
+      throw { status: 409, message: `El día ${date} ya se encuentra bloqueado` };
     throw error;
   }
-  return { success: true, message: 'Día bloqueado correctamente.' };
+  return { success: true, message: 'Día bloqueado correctamente' };
 };
 
 // Bloquear rango de días (ADMIN)
 export const blockRange = async (start_date, end_date, reason) => {
   if (!start_date || !end_date)
-    throw { status: 400, message: 'Fecha inicial y final son obligatorias.' };
+    throw { status: 400, message: 'Fecha inicial y final son obligatorias' };
 
   const start = new Date(start_date);
   const end = new Date(end_date);
 
   if (start > end)
-    throw { status: 400, message: 'La fecha inicial no puede ser mayor a la final.' };
+    throw { status: 400, message: 'La fecha inicial no puede ser mayor a la final' };
 
   const rangeDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
@@ -92,7 +92,7 @@ export const blockRange = async (start_date, end_date, reason) => {
   if (conflicts.length > 0) {
     const conflictDates = conflicts.map((c) => c.date).join(', ');
     throw {
-      status: 400,
+      status: 409,
       message: `No se puede bloquear el rango. Existen citas en: ${conflictDates}.`,
     };
   }
@@ -104,13 +104,13 @@ export const blockRange = async (start_date, end_date, reason) => {
     [values]
   );
 
-  return { success: true, message: 'Rango de fechas bloqueado correctamente.' };
+  return { success: true, message: 'Rango de fechas bloqueado correctamente' };
 };
 
 // Eliminar rango de días bloqueados (ADMIN)
 export const deleteBlockedRange = async (start_date, end_date) => {
   if (!start_date || !end_date)
-    throw { status: 400, message: 'Fecha inicial y final son obligatorias.' };
+    throw { status: 400, message: 'Fecha inicial y final son obligatorias' };
 
   const [result] = await db.query(
     'DELETE FROM blocked_days WHERE date BETWEEN ? AND ?',
@@ -118,9 +118,9 @@ export const deleteBlockedRange = async (start_date, end_date) => {
   );
 
   if (result.affectedRows === 0)
-    throw { status: 404, message: 'No se encontraron días bloqueados en ese rango.' };
+    throw { status: 404, message: 'No se encontraron días bloqueados en ese rango' };
 
-  return { success: true, message: 'Rango eliminado correctamente.' };
+  return { success: true, message: 'Rango eliminado correctamente' };
 };
 
 // Eliminar día bloqueado por ID (ADMIN)
@@ -131,7 +131,7 @@ export const deleteBlockedDay = async (id) => {
   );
 
   if (result.affectedRows === 0)
-    throw { status: 404, message: 'Día bloqueado no encontrado.' };
+    throw { status: 404, message: 'Día bloqueado no encontrado' };
 
-  return { success: true, message: 'Día bloqueado eliminado correctamente.' };
+  return { success: true, message: 'Día bloqueado eliminado correctamente' };
 };

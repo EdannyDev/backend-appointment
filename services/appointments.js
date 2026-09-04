@@ -15,7 +15,7 @@ const MAX_DAYS_AHEAD = 60;
 const BUFFER_MINUTES = 30;
 const MIN_HOURS_BEFORE_CHANGE = 12;
 
-// Transiciones de estado permitidas
+// Transiciones de estado permitidas para las citas
 const ALLOWED_TRANSITIONS = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
   CONFIRMED: ['CANCELLED', 'COMPLETED'],
@@ -115,7 +115,7 @@ export const validateAndGetEndTime = async ({ service_id, date, start_time, excl
   const [overlaps] = await conn.query(query, params);
 
   if (overlaps.length > 0)
-    throw { status: 400, message: 'El horario seleccionado ya está ocupado' };
+    throw { status: 409, message: 'El horario seleccionado ya está ocupado' };
 
   return end_time;
 };
@@ -126,7 +126,7 @@ export const getAvailableSlots = async (service_id, date, conn = db) => {
     throw { status: 400, message: 'El servicio y la fecha son obligatorios' };
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
-    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD' };
+    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD.' };
 
   const [y, m, d] = date.split('-').map(Number);
   const selectedDate = new Date(y, m - 1, d);
@@ -261,7 +261,7 @@ export const create = async (userId, data) => {
     throw { status: 400, message: 'Datos incompletos' };
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
-    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD' };
+    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD.' };
 
   const insertId = await withDateLock(date, async (conn) => {
     const end_time = await validateAndGetEndTime({ service_id, date, start_time }, conn);
@@ -360,7 +360,7 @@ export const getByDay = async (date) => {
     throw { status: 400, message: 'La fecha es obligatoria' };
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
-    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD' };
+    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD.' };
 
   const [rows] = await db.query(
     `SELECT
@@ -501,7 +501,7 @@ export const reschedule = async (appointmentId, userId, data) => {
     throw { status: 400, message: 'La nueva fecha y hora son obligatorias' };
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
-    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD' };
+    throw { status: 400, message: 'Formato de fecha inválido. Use YYYY-MM-DD.' };
 
   const [[appointment]] = await db.query(
     `SELECT a.*, u.name AS client_name, u.email AS client_email,
@@ -558,7 +558,7 @@ export const reschedule = async (appointmentId, userId, data) => {
   return {
     success: true,
     message: requiresReconfirmation
-      ? 'Cita reprogramada correctamente. Queda pendiente de confirmación'
+      ? 'Cita reprogramada correctamente. Queda pendiente de confirmación.'
       : 'Cita reprogramada correctamente',
   };
 };

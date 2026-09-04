@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { db } from '../config/db.js';
 import { generateToken } from '../utils/jwt.js';
 import { sendPasswordResetEmail } from '../utils/email.js';
-import { isValidEmail, isStrongPassword, normalizeEmail } from '../utils/validators.js';
+import { isValidEmail, isStrongPassword, exceedsMaxPasswordLength, normalizeEmail } from '../utils/validators.js';
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME_MINUTES = 15;
@@ -20,6 +20,9 @@ export const registerUser = async ({ name, email, password }) => {
   if (!isValidEmail(normalizedEmail))
     throw { status: 400, message: 'Correo inválido' };
 
+  if (exceedsMaxPasswordLength(password))
+    throw { status: 400, message: `La contraseña no puede superar los 72 caracteres` };
+
   if (!isStrongPassword(password))
     throw { status: 400, message: 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial' };
 
@@ -29,7 +32,7 @@ export const registerUser = async ({ name, email, password }) => {
   );
 
   if (existing.length)
-    throw { status: 400, message: 'El correo ya está registrado' };
+    throw { status: 409, message: 'El correo ya está registrado' };
 
   const hashed = await bcrypt.hash(password, 10);
 
@@ -71,7 +74,7 @@ export const loginUser = async ({ email, password }) => {
   }
 
   if (user.lock_until && new Date(user.lock_until) > new Date())
-    throw { status: 423, message: 'Cuenta bloqueada temporalmente. Intenta más tarde' };
+    throw { status: 423, message: 'Cuenta bloqueada temporalmente. Intenta más tarde.' };
 
   const match = await bcrypt.compare(password, user.password);
 
@@ -120,7 +123,7 @@ export const reactivateAccount = async ({ email, password }) => {
   const user = rows[0];
 
   if (user.is_active)
-    throw { status: 400, message: 'Esta cuenta ya está activa' };
+    throw { status: 409, message: 'Esta cuenta ya está activa' };
 
   const match = await bcrypt.compare(password, user.password);
 
@@ -177,8 +180,11 @@ export const resetPassword = async (rawToken, newPassword) => {
   if (!rawToken || !newPassword)
     throw { status: 400, message: 'Datos incompletos' };
 
+  if (exceedsMaxPasswordLength(newPassword))
+    throw { status: 400, message: `La nueva contraseña no puede superar los 72 caracteres` };
+
   if (!isStrongPassword(newPassword))
-    throw { status: 400, message: 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial' };
+    throw { status: 400, message: 'La nueva contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial' };
 
   const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
@@ -220,24 +226,45 @@ export const getProfileUser = async (userId) => {
 export const updateProfile = async (userId, data) => {
   const { name, email } = data;
 
-  if (!name && !email)
-    throw { status: 400, message: 'No hay campos para actualizar' };
+  const [[current]] = await db.query(
+    'SELECT name, email FROM users WHERE id = ?',
+    [userId]
+  );
+
+  if (!current)
+    throw { status: 404, message: 'Usuario no encontrado' };
 
   const updates = [];
   const values = [];
 
-  if (name) {
+  const trimmedName = name?.trim();
+  if (trimmedName && trimmedName !== current.name) {
     updates.push('name = ?');
-    values.push(name.trim());
+    values.push(trimmedName);
   }
 
   if (email) {
     const normalizedEmail = normalizeEmail(email);
+
     if (!isValidEmail(normalizedEmail))
       throw { status: 400, message: 'Correo inválido' };
-    updates.push('email = ?');
-    values.push(normalizedEmail);
+
+    if (normalizedEmail !== current.email) {
+      const [existing] = await db.query(
+        'SELECT id FROM users WHERE email = ? AND id != ?',
+        [normalizedEmail, userId]
+      );
+
+      if (existing.length)
+        throw { status: 409, message: 'El correo ya está registrado' };
+
+      updates.push('email = ?');
+      values.push(normalizedEmail);
+    }
   }
+
+  if (!updates.length)
+    throw { status: 400, message: 'No hay cambios para actualizar' };
 
   await db.query(
     `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
@@ -262,8 +289,11 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   if (!match)
     throw { status: 400, message: 'Contraseña actual incorrecta' };
 
+  if (exceedsMaxPasswordLength(newPassword))
+    throw { status: 400, message: `La nueva contraseña no puede superar los 72 caracteres` };
+
   if (!isStrongPassword(newPassword))
-    throw { status: 400, message: 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial' };
+    throw { status: 400, message: 'La nueva contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial' };
 
   if (currentPassword === newPassword)
     throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
@@ -293,7 +323,7 @@ export const deactivateAccount = async (userId) => {
     if (cooldownEnds > new Date()) {
       const hoursLeft = Math.ceil((cooldownEnds - new Date()) / (60 * 60 * 1000));
       throw {
-        status: 400,
+        status: 409,
         message: `Reactivaste tu cuenta recientemente. Podrás desactivarla de nuevo en aproximadamente ${hoursLeft} hora${hoursLeft === 1 ? '' : 's'}.`,
       };
     }

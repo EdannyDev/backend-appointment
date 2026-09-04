@@ -11,21 +11,17 @@ const setAuthCookie = (res, token) => {
 };
 
 // Registrar usuario (PUBLIC)
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const result = await userService.registerUser(req.body);
     res.status(201).json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      code: err.code,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Iniciar sesión (PUBLIC)
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { user, token } = await userService.loginUser(req.body);
     setAuthCookie(res, token);
@@ -40,16 +36,12 @@ export const login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      code: err.code,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Reactivar cuenta previamente desactivada (PUBLIC)
-export const reactivateMyAccount = async (req, res) => {
+export const reactivateMyAccount = async (req, res, next) => {
   try {
     const { user, token } = await userService.reactivateAccount(req.body);
     setAuthCookie(res, token);
@@ -64,11 +56,7 @@ export const reactivateMyAccount = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      code: err.code,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
@@ -82,61 +70,49 @@ export const logout = (req, res) => {
 };
 
 // Solicitar restablecimiento de contraseña (PUBLIC)
-export const forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     const result = await userService.forgotPassword(email);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Restablecer contraseña con token (PUBLIC)
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
     const result = await userService.resetPassword(token, newPassword);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Obtener perfil del usuario autenticado (CLIENT | ADMIN)
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
   try {
     const user = await userService.getProfileUser(req.user.id);
     res.json({ success: true, data: user });
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Actualizar perfil del usuario autenticado (CLIENT | ADMIN)
-export const updateMyProfile = async (req, res) => {
+export const updateMyProfile = async (req, res, next) => {
   try {
     const result = await userService.updateProfile(req.user.id, req.body);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Cambiar contraseña del usuario autenticado (CLIENT | ADMIN)
-export const updateMyPassword = async (req, res) => {
+export const updateMyPassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const result = await userService.changePassword(
@@ -147,23 +123,17 @@ export const updateMyPassword = async (req, res) => {
     res.clearCookie('token');
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };
 
 // Desactivar cuenta del usuario autenticado (CLIENT | ADMIN)
-export const deleteMyAccount = async (req, res) => {
+export const deleteMyAccount = async (req, res, next) => {
   try {
     const result = await userService.deactivateAccount(req.user.id);
     res.clearCookie('token');
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-    });
+    next(err);
   }
 };

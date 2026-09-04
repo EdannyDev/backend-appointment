@@ -1,33 +1,27 @@
 import * as businessHoursService from '../services/businessHours.js';
 
 // Obtener horarios laborales activos (PUBLIC)
-export const getActiveBusinessHours = async (req, res) => {
+export const getActiveBusinessHours = async (req, res, next) => {
   try {
     const result = await businessHoursService.getActiveBusinessHours();
     res.json(result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Obtener todos los horarios laborales (ADMIN)
-export const getAllBusinessHours = async (req, res) => {
+export const getAllBusinessHours = async (req, res, next) => {
   try {
     const result = await businessHoursService.getAllBusinessHours();
     res.json(result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-    });
+    next(error);
   }
 };
 
 // Guardar o actualizar horario laboral (ADMIN)
-export const saveBusinessHour = async (req, res) => {
+export const saveBusinessHour = async (req, res, next) => {
   try {
     const { day_of_week, start_time, end_time } = req.body;
     const result = await businessHoursService.saveBusinessHour(
@@ -37,9 +31,6 @@ export const saveBusinessHour = async (req, res) => {
     );
     res.status(201).json(result);
   } catch (error) {
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-    });
+    next(error);
   }
 };

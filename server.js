@@ -74,6 +74,7 @@ app.use((err, req, res, next) => {
   if (isControlled) {
     return res.status(err.status).json({
       success: false,
+      code: err.code,
       message: err.message,
     });
   }
@@ -81,7 +82,7 @@ app.use((err, req, res, next) => {
   return res.status(500).json({
     success: false,
     message: process.env.NODE_ENV === 'production'
-      ? 'Ocurrió un error inesperado. Intenta de nuevo más tarde'
+      ? 'Ocurrió un error inesperado. Intenta de nuevo más tarde.'
       : err.message || 'Error interno del servidor',
   });
 });
