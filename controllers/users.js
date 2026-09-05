@@ -10,6 +10,15 @@ const setAuthCookie = (res, token) => {
   });
 };
 
+// Función auxiliar para limpiar la cookie de autenticación
+const clearAuthCookie = (res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
+};
+
 // Registrar usuario (PUBLIC)
 export const register = async (req, res, next) => {
   try {
@@ -62,7 +71,7 @@ export const reactivateMyAccount = async (req, res, next) => {
 
 // Cerrar sesión (PUBLIC)
 export const logout = (req, res) => {
-  res.clearCookie('token');
+  clearAuthCookie(res);
   res.json({
     success: true,
     message: 'Sesión cerrada correctamente',
@@ -120,7 +129,7 @@ export const updateMyPassword = async (req, res, next) => {
       currentPassword,
       newPassword
     );
-    res.clearCookie('token');
+    clearAuthCookie(res);
     res.json(result);
   } catch (err) {
     next(err);
@@ -131,7 +140,7 @@ export const updateMyPassword = async (req, res, next) => {
 export const deleteMyAccount = async (req, res, next) => {
   try {
     const result = await userService.deactivateAccount(req.user.id);
-    res.clearCookie('token');
+    clearAuthCookie(res);
     res.json(result);
   } catch (err) {
     next(err);
