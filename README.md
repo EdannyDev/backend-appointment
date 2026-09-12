@@ -122,8 +122,6 @@ The API will be available at `http://localhost:5000`.
 
 The API is deployed on [Render](https://render.com) (free tier), with [Aiven](https://aiven.io) MySQL (free tier) as the managed database.
 
-- **API**: [backend-appointment-0eqz.onrender.com](https://backend-appointment-0eqz.onrender.com)
-
 ### Cold Starts & Health Checks
 
 Render's free tier spins the service down after periods of inactivity, so the first request after idle time is delayed (cold start). A `/health` endpoint checks both server and DB connectivity, and is pinged periodically by [UptimeRobot](https://uptimerobot.com) and [cron-job.org](https://cron-job.org) to keep the instance warm and reduce cold-start impact.
