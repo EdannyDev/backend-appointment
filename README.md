@@ -105,7 +105,7 @@ cp .env.example .env
 | `DB_NAME`           | MySQL database name                                        | `appointmentsDB`                |
 | `JWT_SECRET`        | Secret key used to sign JWT tokens                         | `your_jwt_secret_key`           |
 | `JWT_EXPIRES_IN`    | JWT expiration window                                      | `1d`                             |
-| `CLIENT_URL`        | Frontend origin (used for CORS & cookie settings)          | `https://gestor-citas-edannydev.vercel.app` |
+| `CLIENT_URL`        | Frontend origin (used for CORS & cookie settings)          | `http://localhost:3000`         |
 | `RESEND_API_KEY`    | API key for the Resend email service                       | `your_resend_api_key`           |
 | `RESEND_FROM`       | Verified sender address used for outgoing emails           | `onboarding@resend.dev`         |
 | `ADMIN_EMAIL`       | Address that receives admin-facing notifications           | `admin@example.com`             |
