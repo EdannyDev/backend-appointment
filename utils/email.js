@@ -10,7 +10,10 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 // Función centralizada para enviar correos con manejo de errores
 const send = async (payload) => {
   try {
-    await resend.emails.send(payload);
+    const result = await resend.emails.send(payload);
+    if (result.error) {
+      logger.error('[Email] Resend devolvió un error:', result.error);
+    }
   } catch (err) {
     logger.error('[Email] Error al enviar correo:', err?.message || err);
   }
