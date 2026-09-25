@@ -4,7 +4,7 @@ import { formatDateLong, formatTime12h } from '../utils/time.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
-const APP_NAME = 'Gestor de Citas';
+const APP_NAME = 'Lockstep';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 // Función centralizada para enviar correos con manejo de errores

@@ -40,7 +40,7 @@ app.use('/api/v2', generalLimiter);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Bienvenido al servidor de gestión de citas',
+    message: 'Bienvenido al servidor de Lockstep',
   });
 });
 

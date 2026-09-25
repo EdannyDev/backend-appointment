@@ -1,10 +1,10 @@
-# 🚀 Appointment Management System – Backend API
+# 🚀 Lockstep – Backend API
 
-A RESTful API built with **Node.js** and **Express**, designed to handle service scheduling with strict availability validation, overlap prevention and role-based access control. Consumed by the [Appointment Management Frontend](https://github.com/EdannyDev/frontend-appointment).
+A RESTful API built with **Node.js** and **Express**, designed to handle service scheduling with strict availability validation, overlap prevention and role-based access control. Consumed by the [Lockstep Frontend](https://github.com/EdannyDev/frontend-appointment).
 
 ## 📌 Overview
 
-Appointment Management Backend is a RESTful API designed to handle service scheduling with strict availability validation and overlap prevention.
+Lockstep Backend is a RESTful API designed to handle service scheduling with strict availability validation and overlap prevention.
 
 It enforces business-hour constraints, relational data integrity and secure role-based access control. Two deliberate engineering decisions worth calling out: **MySQL named locks** are used to prevent race conditions when two clients try to book the same slot at the same time, and appointment status changes are handled through an explicit **state machine** rather than free-form updates, so an appointment can't move into an invalid status.
 
