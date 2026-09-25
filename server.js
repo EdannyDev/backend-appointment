@@ -17,8 +17,11 @@ const app = express();
 // Proxy para obtener la IP real del cliente
 app.set('trust proxy', 1);
 
-// Seguridad HTTP
-app.use(helmet());
+// Helmet configurado: CSP desactivado (API JSON, sin HTML); CORP configurado (El frontend vive en otro dominio)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
 // CORS solo para el cliente configurado
 app.use(cors({
