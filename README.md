@@ -135,7 +135,7 @@ Render's free tier spins the service down after periods of inactivity, so the fi
 
 ## 🧪 Testing
 
-The project includes unit tests covering critical business logic (e.g. scheduling and status transitions), run with Node's native test runner:
+The project includes unit tests covering availability calculation and booking validation, run with Node's native test runner:
 
 ```bash
 npm test

@@ -7,6 +7,10 @@ const FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
 const APP_NAME = 'Lockstep';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
+// Escapa texto de usuario antes de insertarlo en el HTML de un correo
+const escapeHtml = (value) =>
+  String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 // Función centralizada para enviar correos con manejo de errores
 const send = async (payload) => {
   try {
@@ -67,7 +71,7 @@ const bodyHeader = (title, subtitle) => `
 const row = (label, value) => `
   <tr>
     <td style="padding:7px 14px;font-size:12px;color:#64748b;width:96px;border-bottom:1px solid #e2e8f0;">${label}</td>
-    <td style="padding:7px 14px;font-size:12px;color:#0f172a;font-weight:600;border-bottom:1px solid #e2e8f0;">${value}</td>
+    <td style="padding:7px 14px;font-size:12px;color:#0f172a;font-weight:600;border-bottom:1px solid #e2e8f0;">${escapeHtml(value)}</td>
   </tr>`;
 
 // Tabla de detalles de cita
