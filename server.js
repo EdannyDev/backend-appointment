@@ -97,6 +97,7 @@ const startServer = async () => {
     logger.info('MySQL conectado correctamente');
     app.listen(process.env.PORT, () => {
       logger.info(`Servidor funcionando en puerto ${process.env.PORT}`);
+      console.log("Node", process.version);
     });
   } catch (error) {
     logger.error('Error al conectar a MySQL:', error.message);
