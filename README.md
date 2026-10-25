@@ -76,7 +76,7 @@ Transactional emails (e.g. appointment confirmations and admin notifications) ar
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 24.22.1 or newer (24.x LTS, pinned in `.node-version`)
 - A running MySQL instance
 
 ### Installation
